@@ -2,6 +2,10 @@ package org.twuni.evy;
 
 public class Evy extends StatementTreeExecutor {
 
+	public Evy() {
+		this( "" );
+	}
+
 	public Evy( String program ) {
 
 		super( program );
@@ -12,9 +16,12 @@ public class Evy extends StatementTreeExecutor {
 		subscribe( "on", oneShot );
 		subscribe( "@", oneShot );
 		subscribe( "when", oneShot );
+		subscribe( "next", oneShot );
 
 		subscribe( "@@", forever );
 		subscribe( "whenever", forever );
+		subscribe( "each", forever );
+		subscribe( "every", forever );
 
 	}
 

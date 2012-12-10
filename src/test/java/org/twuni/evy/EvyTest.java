@@ -56,4 +56,49 @@ public class EvyTest {
 		Assert.assertTrue( success );
 	}
 
+	@Test
+	public void testMultipleExecutions() {
+
+		Evy evy = new Evy( "on happens once\n  test\n@@ happening\n  else" );
+
+		evy.subscribe( "test", new StatementExecutor() {
+
+			@Override
+			public void execute( Statement statement ) {
+				success = false;
+			}
+
+		} );
+
+		evy.subscribe( "else", new StatementExecutor() {
+
+			@Override
+			public void execute( Statement statement ) {
+				success = false;
+			}
+
+		} );
+
+		success = true;
+		evy.execute();
+		Assert.assertTrue( success );
+
+		success = true;
+		evy.execute( "happens once" );
+		Assert.assertFalse( success );
+
+		success = true;
+		evy.execute( "happens once" );
+		Assert.assertTrue( success );
+
+		success = true;
+		evy.execute( "happening" );
+		Assert.assertFalse( success );
+
+		success = true;
+		evy.execute( "happening" );
+		Assert.assertFalse( success );
+
+	}
+
 }
