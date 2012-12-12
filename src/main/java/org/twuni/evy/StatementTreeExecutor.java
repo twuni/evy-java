@@ -39,6 +39,10 @@ public class StatementTreeExecutor implements StatementExecutor {
 		execute( new StatementTree( program ) );
 	}
 
+	public void publish( String eventName ) {
+		publish( eventName, null );
+	}
+
 	public void publish( String eventName, List<String []> parameters ) {
 		publish( eventName, parameters, root );
 	}
