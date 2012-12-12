@@ -48,6 +48,9 @@ public class StatementTreeExecutor implements StatementExecutor {
 		if( event == null ) {
 			return;
 		}
+		if( context == null ) {
+			context = root;
+		}
 		for( int i = 0; i < event.size(); i++ ) {
 			context.setSymbols( parameters );
 			event.get( i ).execute( context );
