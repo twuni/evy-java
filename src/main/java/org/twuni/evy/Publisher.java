@@ -20,6 +20,7 @@ public class Publisher {
 
 	public Publisher( Event root ) {
 		this.root = root;
+		reset();
 	}
 
 	public Publisher( String program ) {

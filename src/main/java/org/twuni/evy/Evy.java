@@ -7,8 +7,14 @@ public class Evy extends Publisher {
 	}
 
 	public Evy( String program ) {
-
 		super( program );
+		reset();
+	}
+
+	@Override
+	public void reset() {
+
+		super.reset();
 
 		Subscription oneShot = new OneShotSubscription( this );
 		Subscription forever = new Subscription( this );
