@@ -5,9 +5,9 @@ import java.util.List;
 import org.junit.Assert;
 import org.junit.Test;
 
-public class StatementParserTest {
+public class EventParserTest {
 
-	private static final StatementParser STATEMENT = new StatementParser();
+	private static final EventParser STATEMENT = new EventParser();
 
 	@Test
 	public void testEmptyStatement() {

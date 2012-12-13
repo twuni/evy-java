@@ -1,10 +1,10 @@
 package org.twuni.evy;
 
-public class Subscription implements StatementExecutor {
+public class Subscription implements Subscriber {
 
-	protected final StatementTreeExecutor root;
+	protected final Publisher root;
 
-	public Subscription( StatementTreeExecutor root ) {
+	public Subscription( Publisher root ) {
 		this.root = root;
 	}
 
@@ -14,16 +14,16 @@ public class Subscription implements StatementExecutor {
 	 * @param eventName
 	 *            The event to which this executor will subscribe.
 	 */
-	protected StatementExecutor createExecutor( Statement context, String eventName, Statement parent ) {
-		return new IndirectStatementExecutor( root, context, parent );
+	protected Subscriber createExecutor( Event context, String eventName, Event parent ) {
+		return new IndirectSubscriber( root, context, parent );
 	}
 
 	@Override
-	public void execute( Statement statement ) {
-		String eventName = statement.lookup( 0 );
-		for( int i = 0; i < statement.getChildren().size(); i++ ) {
-			Statement child = statement.getChildren().get( i );
-			root.subscribe( eventName, createExecutor( child, eventName, statement ) );
+	public void onPublish( Event event ) {
+		String eventName = event.get( 0 );
+		for( int i = 0; i < event.getChildren().size(); i++ ) {
+			Event child = event.getChildren().get( i );
+			root.subscribe( eventName, createExecutor( child, eventName, event ) );
 		}
 	}
 

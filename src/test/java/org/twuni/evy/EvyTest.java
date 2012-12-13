@@ -15,47 +15,79 @@ public class EvyTest {
 
 	@Test
 	public void testDoubleNestedHotness() {
-		Evy root = new Evy( "@ A a\n  @ B b=123\n    @ C\n      D\n  @ B b=456\n    @ C\n      D" );
-		success = false;
-		root.subscribe( "D", new StatementExecutor() {
+
+		String [] program = {
+			"@@ Engaged",
+			"  NPC says=\"Hi, there.\"",
+			"  Consider saying=\"Hello.\"",
+			"  Consider saying=\"Sorry, I have to go.\"",
+			"  @ Player says=\"Hello.\"",
+			"    NPC says=\"I was hoping that\\nyou could help me\\nwith a quest.\"",
+			"    Consider saying=\"Tell me more...\"",
+			"    Consider saying=\"Actually, I'm busy.\""
+		};
+
+		StringBuilder s = new StringBuilder();
+		for( String element : program ) {
+			s.append( element ).append( "\n" );
+		}
+
+		Evy root = new Evy();
+
+		root.subscribe( "NPC", new Subscriber() {
 
 			@Override
-			public void execute( Statement statement ) {
-				success = true;
+			public void onPublish( Event statement ) {
+				System.out.println( String.format( "[Garn] %s", statement.get( "says" ) ) );
 			}
 
 		} );
-		Assert.assertFalse( success );
-		root.execute();
-		Assert.assertFalse( success );
-		root.execute( "A a=123" );
-		Assert.assertFalse( success );
-		root.execute( "B b=456" );
-		Assert.assertFalse( success );
-		root.execute( "C" );
-		Assert.assertTrue( success );
+
+		root.subscribe( "Player", new Subscriber() {
+
+			@Override
+			public void onPublish( Event statement ) {
+				System.out.println( String.format( "[you] %s", statement.get( "says" ) ) );
+			}
+
+		} );
+
+		root.subscribe( "Consider", new Subscriber() {
+
+			@Override
+			public void onPublish( Event statement ) {
+				System.out.println( String.format( "> %s", statement.get( "saying" ) ) );
+			}
+
+		} );
+
+		root.publish( s.toString() );
+		root.publish( "Engaged" );
+		root.publish( "Player says=\"Hello.\"" );
+		root.publish( "Player says=\"Tell me more...\"" );
+
 	}
 
 	@Test
 	public void testMultiLineProgramWithAncestralLookup() {
 
-		StatementTreeExecutor root = new Evy( "on say message\n  print message\nsay message=\"Hello\"" );
+		Publisher root = new Evy( "on say message\n  print message\nsay message=\"Hello\"" );
 
 		success = false;
-		root.subscribe( "print", new StatementExecutor() {
+		root.subscribe( "print", new Subscriber() {
 
 			@Override
-			public void execute( Statement statement ) {
-				Assert.assertEquals( "\"Hello\"", statement.lookup( "message" ) );
-				Assert.assertEquals( "\"Hello\"", statement.lookup( 0 ) );
-				Assert.assertNull( statement.lookup( 1 ) );
-				Assert.assertNull( statement.lookup( "print" ) );
+			public void onPublish( Event statement ) {
+				Assert.assertEquals( "\"Hello\"", statement.get( "message" ) );
+				Assert.assertEquals( "\"Hello\"", statement.get( 0 ) );
+				Assert.assertNull( statement.get( 1 ) );
+				Assert.assertNull( statement.get( "print" ) );
 				success = true;
 			}
 
 		} );
 
-		root.execute();
+		root.publish();
 
 		Assert.assertTrue( success );
 
@@ -63,19 +95,19 @@ public class EvyTest {
 
 	@Test
 	public void testMultiLineProgramWithSeveralSubscriptionsRunsAsExpected() {
-		StatementTreeExecutor root = new Evy( "on error\n  print message\nerror message=\"haha u suck\"" );
+		Publisher root = new Evy( "on error\n  print message\nerror message=\"haha u suck\"" );
 		success = false;
-		root.subscribe( "print", new StatementExecutor() {
+		root.subscribe( "print", new Subscriber() {
 
 			@Override
-			public void execute( Statement statement ) {
+			public void onPublish( Event statement ) {
 				success = true;
-				Assert.assertEquals( "\"haha u suck\"", statement.lookup( 0 ) );
-				Assert.assertEquals( "\"haha u suck\"", statement.lookup( "message" ) );
+				Assert.assertEquals( "\"haha u suck\"", statement.get( 0 ) );
+				Assert.assertEquals( "\"haha u suck\"", statement.get( "message" ) );
 			}
 
 		} );
-		root.execute();
+		root.publish();
 		Assert.assertTrue( success );
 	}
 
@@ -84,42 +116,44 @@ public class EvyTest {
 
 		Evy evy = new Evy( "@ happens\n  test\n@@ happening\n  else" );
 
-		evy.subscribe( "test", new StatementExecutor() {
+		success = true;
+
+		evy.subscribe( "test", new Subscriber() {
 
 			@Override
-			public void execute( Statement statement ) {
+			public void onPublish( Event statement ) {
 				success = false;
 			}
 
 		} );
 
-		evy.subscribe( "else", new StatementExecutor() {
+		evy.subscribe( "else", new Subscriber() {
 
 			@Override
-			public void execute( Statement statement ) {
+			public void onPublish( Event statement ) {
 				success = false;
 			}
 
 		} );
 
-		success = true;
-		evy.execute();
 		Assert.assertTrue( success );
 
+		evy.publish();
+
 		success = true;
-		evy.execute( "happens once" );
+		evy.publish( new Event( "happens" ) );
 		Assert.assertFalse( success );
 
 		success = true;
-		evy.execute( "happens once" );
+		evy.publish( new Event( "happens" ) );
 		Assert.assertTrue( success );
 
 		success = true;
-		evy.execute( "happening" );
+		evy.publish( "happening" );
 		Assert.assertFalse( success );
 
 		success = true;
-		evy.execute( "happening" );
+		evy.publish( "happening" );
 		Assert.assertFalse( success );
 
 	}
@@ -128,46 +162,45 @@ public class EvyTest {
 	public void testSubscriptionWithComplicatedStuff() {
 		Evy root = new Evy( "@ Greet\n  NPC says=\"Hi\"\n  Consider saying=\"Sup\"\n  Consider saying=\"Yo\"\n  @ Player says=\"Yo\"\n    Smack\n  @ Player says=\"Sup\"\n    Nod\n" );
 		success = false;
-		root.subscribe( "Nod", new StatementExecutor() {
+		root.subscribe( "Nod", new Subscriber() {
 
 			@Override
-			public void execute( Statement statement ) {
+			public void onPublish( Event statement ) {
 				success = true;
 			}
 
 		} );
-		root.subscribe( "Smack", new StatementExecutor() {
+		root.subscribe( "Smack", new Subscriber() {
 
 			@Override
-			public void execute( Statement statement ) {
+			public void onPublish( Event statement ) {
 				Assert.fail( "Should NOT get smacked in this scenario." );
 			}
 
 		} );
-		root.execute();
-		root.execute( "Greet" );
-		root.execute( "Player says=\"Sup\"" );
+		root.publish();
+		root.publish( "Greet" );
+		root.publish( new Event( "Player says=\"Sup\"" ) );
 		Assert.assertTrue( success );
 		success = false;
-		root.execute( "Player says=\"Sup\"" );
+		root.publish( new Event( "Player says=\"Sup\"" ) );
 		Assert.assertFalse( success );
 	}
 
 	@Test
 	public void testSubscriptionWithParameterQualifierDoesNotTriggerWhenEventIsPublishedWithoutThoseParameters() {
 		Evy root = new Evy( "@ taste chicken\n  say \"Yum!\"\n@ taste cauliflower\n  say \"Eww, nasty!\"" );
-		root.subscribe( "say", new StatementExecutor() {
+		root.subscribe( "say", new Subscriber() {
 
 			@Override
-			public void execute( Statement statement ) {
-				if( !"Yum!".equals( statement.lookup( 0 ).split( "\"" )[1] ) ) {
+			public void onPublish( Event statement ) {
+				if( !"Yum!".equals( statement.get( 0 ).split( "\"" )[1] ) ) {
 					Assert.fail( "Should never say anything except Yum! when tasting chicken." );
 				}
 			}
 
 		} );
-		root.execute();
-		root.execute( "taste chicken" );
+		root.publish( "taste chicken" );
 	}
 
 }

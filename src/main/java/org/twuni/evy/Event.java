@@ -6,21 +6,21 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 
-public class Statement {
+public class Event {
 
 	private static final Pattern IDENTIFIER = Pattern.compile( "^[^\\d\"\\.\\+\\-'\\s][^\"\\.\\+\\-'\\s]*", Pattern.CASE_INSENSITIVE );
-	private static final StatementParser PARSER = new StatementParser();
+	private static final EventParser PARSER = new EventParser();
 	private static final String EMPTY = "";
 
-	private final Statement parent;
+	private final Event parent;
 	private final String name;
 	private final int depth;
-	private final List<Statement> children = new ArrayList<Statement>();
+	private final List<Event> children = new ArrayList<Event>();
 	private final Map<String, String> symbols = new HashMap<String, String>();
 	private final List<String> values = new ArrayList<String>();
 	private final List<String []> parameters;
 
-	public Statement( Statement parent, String source ) {
+	public Event( Event parent, String source ) {
 		this.parent = parent;
 		if( source != null ) {
 			name = source.replaceAll( "^\\s+", "" );
@@ -33,15 +33,15 @@ public class Statement {
 		}
 	}
 
-	public Statement( String source ) {
+	public Event( String source ) {
 		this( null, source );
 	}
 
-	public void copySymbolsFrom( Statement statement ) {
+	public void copySymbolsFrom( Event statement ) {
 		symbols.putAll( statement.symbols );
 	}
 
-	public List<Statement> getChildren() {
+	public List<Event> getChildren() {
 		return children;
 	}
 
@@ -57,6 +57,10 @@ public class Statement {
 		return parameters;
 	}
 
+	public Event getParent() {
+		return parent;
+	}
+
 	public boolean isEmpty() {
 		return name == null || EMPTY.equals( name );
 	}
@@ -65,16 +69,36 @@ public class Statement {
 		return values.size();
 	}
 
-	public String lookup( int index ) {
+	public String get( int index ) {
 		return values.size() > index ? values.get( index ) : null;
 	}
 
-	public String lookup( String key ) {
+	public String get( String key ) {
 		String value = symbols.get( key );
 		if( value == null && parent != null ) {
-			value = parent.lookup( key );
+			value = parent.get( key );
 		}
 		return value;
+	}
+
+	/**
+	 * Discards the event state.
+	 */
+	public void reset() {
+		symbols.clear();
+		values.clear();
+		parameters.clear();
+		children.clear();
+	}
+
+	/**
+	 * Discards the event state.
+	 * 
+	 * @param source
+	 *            If applicable, this specifies a new event state.
+	 */
+	public void reset( String source ) {
+		reset();
 	}
 
 	public void setSymbols( List<String []> parameters ) {
@@ -87,7 +111,7 @@ public class Statement {
 			if( parameter[0] != null ) {
 				symbols.put( parameter[0], parameter[1] );
 			} else if( parameter[1] != null && IDENTIFIER.matcher( parameter[1] ).matches() ) {
-				String value = lookup( parameter[1] );
+				String value = get( parameter[1] );
 				if( value != null ) {
 					parameter[0] = parameter[1];
 					parameter[1] = value;

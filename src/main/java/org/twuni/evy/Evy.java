@@ -1,6 +1,6 @@
 package org.twuni.evy;
 
-public class Evy extends StatementTreeExecutor {
+public class Evy extends Publisher {
 
 	public Evy() {
 		this( "" );

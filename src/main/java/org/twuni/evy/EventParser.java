@@ -3,7 +3,7 @@ package org.twuni.evy;
 import java.util.ArrayList;
 import java.util.List;
 
-public class StatementParser {
+public class EventParser {
 
 	private static final String SPACE = " ";
 	private static final String EQUALS = "=";
