@@ -14,6 +14,29 @@ public class EvyTest {
 	}
 
 	@Test
+	public void testDoubleNestedHotness() {
+		Evy root = new Evy( "@ A a\n  @ B b=123\n    @ C\n      D\n  @ B b=456\n    @ C\n      D" );
+		success = false;
+		root.subscribe( "D", new StatementExecutor() {
+
+			@Override
+			public void execute( Statement statement ) {
+				success = true;
+			}
+
+		} );
+		Assert.assertFalse( success );
+		root.execute();
+		Assert.assertFalse( success );
+		root.execute( "A a=123" );
+		Assert.assertFalse( success );
+		root.execute( "B b=456" );
+		Assert.assertFalse( success );
+		root.execute( "C" );
+		Assert.assertTrue( success );
+	}
+
+	@Test
 	public void testMultiLineProgramWithAncestralLookup() {
 
 		StatementTreeExecutor root = new Evy( "on say message\n  print message\nsay message=\"Hello\"" );

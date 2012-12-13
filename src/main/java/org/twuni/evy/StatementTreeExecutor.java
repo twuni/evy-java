@@ -55,8 +55,9 @@ public class StatementTreeExecutor implements StatementExecutor {
 		if( context == null ) {
 			context = root;
 		}
-		for( int i = 0; i < subscribers.size(); i++ ) {
-			StatementExecutor subscriber = subscribers.get( i );
+		int length = subscribers.size();
+		for( int i = 0; i < length; i++ ) {
+			StatementExecutor subscriber = subscribers.get( Math.min( subscribers.size() - 1, i ) );
 			context.setSymbols( parameters );
 			subscriber.execute( context );
 		}
