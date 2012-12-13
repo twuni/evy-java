@@ -9,6 +9,7 @@ import java.util.regex.Pattern;
 public class Statement {
 
 	private static final Pattern IDENTIFIER = Pattern.compile( "^[^\\d\"\\.\\+\\-'\\s][^\"\\.\\+\\-'\\s]*", Pattern.CASE_INSENSITIVE );
+	private static final StatementParser PARSER = new StatementParser();
 	private static final String EMPTY = "";
 
 	private final Statement parent;
@@ -17,15 +18,18 @@ public class Statement {
 	private final List<Statement> children = new ArrayList<Statement>();
 	private final Map<String, String> symbols = new HashMap<String, String>();
 	private final List<String> values = new ArrayList<String>();
+	private final List<String []> parameters;
 
 	public Statement( Statement parent, String source ) {
 		this.parent = parent;
 		if( source != null ) {
 			name = source.replaceAll( "^\\s+", "" );
 			depth = source.length() - name.length();
+			parameters = PARSER.parse( source );
 		} else {
 			name = null;
 			depth = -1;
+			parameters = new ArrayList<String []>();
 		}
 	}
 
@@ -47,6 +51,10 @@ public class Statement {
 
 	public String getName() {
 		return name;
+	}
+
+	public List<String []> getParameters() {
+		return parameters;
 	}
 
 	public boolean isEmpty() {

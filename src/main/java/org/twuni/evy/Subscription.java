@@ -14,8 +14,8 @@ public class Subscription implements StatementExecutor {
 	 * @param eventName
 	 *            The event to which this executor will subscribe.
 	 */
-	protected StatementExecutor createExecutor( Statement context, String eventName ) {
-		return new IndirectStatementExecutor( root, context );
+	protected StatementExecutor createExecutor( Statement context, String eventName, Statement parent ) {
+		return new IndirectStatementExecutor( root, context, parent );
 	}
 
 	@Override
@@ -23,7 +23,7 @@ public class Subscription implements StatementExecutor {
 		String eventName = statement.lookup( 0 );
 		for( int i = 0; i < statement.getChildren().size(); i++ ) {
 			Statement child = statement.getChildren().get( i );
-			root.subscribe( eventName, createExecutor( child, eventName ) );
+			root.subscribe( eventName, createExecutor( child, eventName, statement ) );
 		}
 	}
 

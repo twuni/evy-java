@@ -101,4 +101,21 @@ public class EvyTest {
 
 	}
 
+	@Test
+	public void testSubscriptionWithParameterQualifierDoesNotTriggerWhenEventIsPublishedWithoutThoseParameters() {
+		Evy root = new Evy( "@ taste chicken\n  say \"Yum!\"\n@ taste cauliflower\n  say \"Eww, nasty!\"" );
+		root.subscribe( "say", new StatementExecutor() {
+
+			@Override
+			public void execute( Statement statement ) {
+				if( !"Yum!".equals( statement.lookup( 0 ).split( "\"" )[1] ) ) {
+					Assert.fail( "Should never say anything except Yum! when tasting chicken." );
+				}
+			}
+
+		} );
+		root.execute();
+		root.execute( "taste chicken" );
+	}
+
 }

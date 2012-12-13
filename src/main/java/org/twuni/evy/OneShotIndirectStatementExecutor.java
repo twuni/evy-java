@@ -4,8 +4,8 @@ public class OneShotIndirectStatementExecutor extends IndirectStatementExecutor 
 
 	private final String eventName;
 
-	public OneShotIndirectStatementExecutor( StatementTreeExecutor root, Statement delegate, String eventName ) {
-		super( root, delegate );
+	public OneShotIndirectStatementExecutor( StatementTreeExecutor root, Statement delegate, String eventName, Statement parent ) {
+		super( root, delegate, parent );
 		this.eventName = eventName;
 	}
 

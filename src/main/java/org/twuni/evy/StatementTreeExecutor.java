@@ -48,34 +48,35 @@ public class StatementTreeExecutor implements StatementExecutor {
 	}
 
 	public void publish( String eventName, List<String []> parameters, Statement context ) {
-		List<StatementExecutor> event = events.get( eventName );
-		if( event == null ) {
+		List<StatementExecutor> subscribers = events.get( eventName );
+		if( subscribers == null ) {
 			return;
 		}
 		if( context == null ) {
 			context = root;
 		}
-		for( int i = 0; i < event.size(); i++ ) {
+		for( int i = 0; i < subscribers.size(); i++ ) {
+			StatementExecutor subscriber = subscribers.get( i );
 			context.setSymbols( parameters );
-			event.get( i ).execute( context );
+			subscriber.execute( context );
 		}
 	}
 
-	public void subscribe( String eventName, StatementExecutor executor ) {
-		List<StatementExecutor> event = events.get( eventName );
-		if( event == null ) {
-			event = new ArrayList<StatementExecutor>();
-			events.put( eventName, event );
+	public void subscribe( String eventName, StatementExecutor subscriber ) {
+		List<StatementExecutor> subscribers = events.get( eventName );
+		if( subscribers == null ) {
+			subscribers = new ArrayList<StatementExecutor>();
+			events.put( eventName, subscribers );
 		}
-		event.add( executor );
+		subscribers.add( subscriber );
 	}
 
-	public void unsubscribe( String eventName, StatementExecutor executor ) {
-		List<StatementExecutor> event = events.get( eventName );
-		if( event == null ) {
+	public void unsubscribe( String eventName, StatementExecutor subscriber ) {
+		List<StatementExecutor> subscribers = events.get( eventName );
+		if( subscribers == null ) {
 			return;
 		}
-		event.remove( executor );
+		subscribers.remove( subscriber );
 	}
 
 }
