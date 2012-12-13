@@ -20,7 +20,7 @@ public class Publisher {
 
 	public Publisher( Event root ) {
 		this.root = root;
-		reset();
+		publish( root );
 	}
 
 	public Publisher( String program ) {
@@ -89,6 +89,9 @@ public class Publisher {
 	 *            on to subscribers. If context is null, the root context will be used instead.
 	 */
 	public void publish( String eventName, List<String []> parameters, Event context ) {
+		if( events.isEmpty() ) {
+			registerDefaultSubscriptions();
+		}
 		List<Subscriber> subscribers = events.get( eventName );
 		if( subscribers == null ) {
 			return;
@@ -105,11 +108,20 @@ public class Publisher {
 	}
 
 	/**
+	 * Override this method to register subscribers that should always be present, regardless of
+	 * program state.
+	 */
+	protected void registerDefaultSubscriptions() {
+		// The default implementation has no inherent subscriptions.
+	}
+
+	/**
 	 * Clears all subscribers, then publishes the root event (to reset this publisher to its initial
 	 * state).
 	 */
 	public void reset() {
 		events.clear();
+		registerDefaultSubscriptions();
 		publish( root );
 	}
 

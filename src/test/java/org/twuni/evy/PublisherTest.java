@@ -22,7 +22,7 @@ public class PublisherTest {
 	@Test
 	public void testMultiLineProgramWithAncestralLookup() {
 
-		Publisher publisher = new Evy( "on say message\n  print message\nsay message=\"Hello\"" );
+		Publisher publisher = new Evy( "@ say message\n  print message\nsay message=\"Hello\"" );
 
 		success = false;
 

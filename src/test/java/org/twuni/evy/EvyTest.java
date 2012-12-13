@@ -71,7 +71,7 @@ public class EvyTest {
 	@Test
 	public void testMultiLineProgramWithAncestralLookup() {
 
-		Publisher root = new Evy( "on say message\n  print message\nsay message=\"Hello\"" );
+		Publisher root = new Evy( "@ say message\n  print message\nsay message=\"Hello\"" );
 
 		success = false;
 		root.subscribe( "print", new Subscriber() {
@@ -95,7 +95,7 @@ public class EvyTest {
 
 	@Test
 	public void testMultiLineProgramWithSeveralSubscriptionsRunsAsExpected() {
-		Publisher root = new Evy( "on error\n  print message\nerror message=\"haha u suck\"" );
+		Publisher root = new Evy( "@ error\n  print message\nerror message=\"haha u suck\"" );
 		success = false;
 		root.subscribe( "print", new Subscriber() {
 
