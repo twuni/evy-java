@@ -25,7 +25,7 @@ public class Statement {
 		if( source != null ) {
 			name = source.replaceAll( "^\\s+", "" );
 			depth = source.length() - name.length();
-			parameters = PARSER.parse( source );
+			parameters = PARSER.parse( name );
 		} else {
 			name = null;
 			depth = -1;

@@ -59,7 +59,7 @@ public class EvyTest {
 	@Test
 	public void testMultipleExecutions() {
 
-		Evy evy = new Evy( "on happens once\n  test\n@@ happening\n  else" );
+		Evy evy = new Evy( "@ happens\n  test\n@@ happening\n  else" );
 
 		evy.subscribe( "test", new StatementExecutor() {
 
@@ -99,6 +99,35 @@ public class EvyTest {
 		evy.execute( "happening" );
 		Assert.assertFalse( success );
 
+	}
+
+	@Test
+	public void testSubscriptionWithComplicatedStuff() {
+		Evy root = new Evy( "@ Greet\n  NPC says=\"Hi\"\n  Consider saying=\"Sup\"\n  Consider saying=\"Yo\"\n  @ Player says=\"Yo\"\n    Smack\n  @ Player says=\"Sup\"\n    Nod\n" );
+		success = false;
+		root.subscribe( "Nod", new StatementExecutor() {
+
+			@Override
+			public void execute( Statement statement ) {
+				success = true;
+			}
+
+		} );
+		root.subscribe( "Smack", new StatementExecutor() {
+
+			@Override
+			public void execute( Statement statement ) {
+				Assert.fail( "Should NOT get smacked in this scenario." );
+			}
+
+		} );
+		root.execute();
+		root.execute( "Greet" );
+		root.execute( "Player says=\"Sup\"" );
+		Assert.assertTrue( success );
+		success = false;
+		root.execute( "Player says=\"Sup\"" );
+		Assert.assertFalse( success );
 	}
 
 	@Test

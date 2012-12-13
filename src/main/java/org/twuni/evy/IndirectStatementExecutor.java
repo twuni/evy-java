@@ -13,16 +13,22 @@ public class IndirectStatementExecutor implements StatementExecutor {
 	}
 
 	@Override
-	public void execute( Statement statement ) {
+	public void execute( Statement trigger ) {
 		if( parent != null ) {
-			for( int i = 1; i < parent.getParameters().size(); i++ ) {
+			for( int i = 2; i < parent.getParameters().size(); i++ ) {
 				String [] parameter = parent.getParameters().get( i );
-				if( parameter[0] != null && statement.lookup( parameter[0] ) == null ) {
-					return;
+				if( parameter[0] == null ) {
+					if( trigger.lookup( parameter[1] ) == null ) {
+						throw new RuntimeException( "No match!" );
+					}
+				} else {
+					if( !parameter[1].equals( trigger.lookup( parameter[0] ) ) ) {
+						throw new RuntimeException( "No match!" );
+					}
 				}
 			}
 		}
-		delegate.copySymbolsFrom( statement );
+		delegate.copySymbolsFrom( trigger );
 		root.execute( delegate );
 	}
 

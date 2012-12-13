@@ -11,8 +11,12 @@ public class OneShotIndirectStatementExecutor extends IndirectStatementExecutor 
 
 	@Override
 	public void execute( Statement statement ) {
-		super.execute( statement );
-		root.unsubscribe( eventName, this );
+		try {
+			super.execute( statement );
+			root.unsubscribe( eventName, this );
+		} catch( RuntimeException exception ) {
+			// This wasn't a match.
+		}
 	}
 
 }
