@@ -32,39 +32,47 @@ public class EvyTest {
 			s.append( element ).append( "\n" );
 		}
 
-		Evy root = new Evy();
-
-		root.subscribe( "NPC", new Subscriber() {
+		Evy evy = new Evy( s.toString() ) {
 
 			@Override
-			public void onPublish( Event statement ) {
-				System.out.println( String.format( "[Garn] %s", statement.get( "says" ) ) );
+			protected void registerDefaultSubscriptions() {
+				super.registerDefaultSubscriptions();
+				subscribe( "NPC", new Subscriber() {
+
+					@Override
+					public void onPublish( Event statement ) {
+						System.out.println( String.format( "[Garn] %s", statement.get( "says" ) ) );
+					}
+
+				} );
+
+				subscribe( "Player", new Subscriber() {
+
+					@Override
+					public void onPublish( Event statement ) {
+						System.out.println( String.format( "[you] %s", statement.get( "says" ) ) );
+					}
+
+				} );
+
+				subscribe( "Consider", new Subscriber() {
+
+					@Override
+					public void onPublish( Event statement ) {
+						System.out.println( String.format( "> %s", statement.get( "saying" ) ) );
+					}
+
+				} );
 			}
+		};
 
-		} );
-
-		root.subscribe( "Player", new Subscriber() {
-
-			@Override
-			public void onPublish( Event statement ) {
-				System.out.println( String.format( "[you] %s", statement.get( "says" ) ) );
-			}
-
-		} );
-
-		root.subscribe( "Consider", new Subscriber() {
-
-			@Override
-			public void onPublish( Event statement ) {
-				System.out.println( String.format( "> %s", statement.get( "saying" ) ) );
-			}
-
-		} );
-
-		root.publish( s.toString() );
-		root.publish( "Engaged" );
-		root.publish( "Player says=\"Hello.\"" );
-		root.publish( "Player says=\"Tell me more...\"" );
+		evy.publish( "Engaged" );
+		evy.publish( new Event( "Player says=\"Hello.\"" ) );
+		evy.publish( new Event( "Player says=\"Tell me more...\"" ) );
+		evy.reset();
+		evy.publish( "Engaged" );
+		evy.publish( new Event( "Player says=\"Hello.\"" ) );
+		evy.publish( new Event( "Player says=\"Tell me more...\"" ) );
 
 	}
 
