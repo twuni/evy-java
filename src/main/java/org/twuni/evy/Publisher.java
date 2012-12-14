@@ -99,12 +99,24 @@ public class Publisher {
 		if( context == null ) {
 			context = root;
 		}
+
 		int length = subscribers.size();
+
 		for( int i = 0; i < length; i++ ) {
-			Subscriber subscriber = subscribers.get( Math.min( subscribers.size() - 1, i ) );
+
+			Subscriber subscriber = subscribers.get( i );
+
 			context.setSymbols( parameters );
 			subscriber.onPublish( context );
+
+			int d = subscribers.size() - length;
+			length += d;
+			if( d < 0 ) {
+				i += d;
+			}
+
 		}
+
 	}
 
 	/**

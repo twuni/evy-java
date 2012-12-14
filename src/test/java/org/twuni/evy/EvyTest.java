@@ -14,69 +14,6 @@ public class EvyTest {
 	}
 
 	@Test
-	public void testDoubleNestedHotness() {
-
-		String [] program = {
-			"@@ Engaged",
-			"  NPC says=\"Hi, there.\"",
-			"  Consider saying=\"Hello.\"",
-			"  Consider saying=\"Sorry, I have to go.\"",
-			"  @ Player says=\"Hello.\"",
-			"    NPC says=\"I was hoping that\\nyou could help me\\nwith a quest.\"",
-			"    Consider saying=\"Tell me more...\"",
-			"    Consider saying=\"Actually, I'm busy.\""
-		};
-
-		StringBuilder s = new StringBuilder();
-		for( String element : program ) {
-			s.append( element ).append( "\n" );
-		}
-
-		Evy evy = new Evy( s.toString() ) {
-
-			@Override
-			protected void registerDefaultSubscriptions() {
-				super.registerDefaultSubscriptions();
-				subscribe( "NPC", new Subscriber() {
-
-					@Override
-					public void onPublish( Event statement ) {
-						System.out.println( String.format( "[Garn] %s", statement.get( "says" ) ) );
-					}
-
-				} );
-
-				subscribe( "Player", new Subscriber() {
-
-					@Override
-					public void onPublish( Event statement ) {
-						System.out.println( String.format( "[you] %s", statement.get( "says" ) ) );
-					}
-
-				} );
-
-				subscribe( "Consider", new Subscriber() {
-
-					@Override
-					public void onPublish( Event statement ) {
-						System.out.println( String.format( "> %s", statement.get( "saying" ) ) );
-					}
-
-				} );
-			}
-		};
-
-		evy.publish( "Engaged" );
-		evy.publish( new Event( "Player says=\"Hello.\"" ) );
-		evy.publish( new Event( "Player says=\"Tell me more...\"" ) );
-		evy.reset();
-		evy.publish( "Engaged" );
-		evy.publish( new Event( "Player says=\"Hello.\"" ) );
-		evy.publish( new Event( "Player says=\"Tell me more...\"" ) );
-
-	}
-
-	@Test
 	public void testMultiLineProgramWithAncestralLookup() {
 
 		Publisher root = new Evy( "@ say message\n  print message\nsay message=\"Hello\"" );
