@@ -7,7 +7,7 @@ public class OneShotSubscription extends Subscription {
 	}
 
 	@Override
-	protected Subscriber createExecutor( Event context, String eventName, Event parent ) {
+	protected Subscriber createSubscriber( Event context, String eventName, Event parent ) {
 		return new OneShotIndirectSubscriber( root, context, eventName, parent );
 	}
 

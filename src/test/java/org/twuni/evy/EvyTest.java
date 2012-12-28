@@ -1,5 +1,8 @@
 package org.twuni.evy;
 
+import java.io.File;
+import java.io.IOException;
+
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -101,6 +104,83 @@ public class EvyTest {
 		evy.publish( "happening" );
 		Assert.assertFalse( success );
 
+	}
+
+	@Test
+	public void testSecondChoiceOfLikeEventNameIsTraversible() {
+		success = false;
+		Publisher root = new Evy( "@ start a=789\n  @ test a=123\n    FAIL\n  @ test a=456\n    PASS\nstart a=789\ntest a=456" ) {
+
+			@Override
+			protected void registerDefaultSubscriptions() {
+
+				super.registerDefaultSubscriptions();
+
+				subscribe( "PASS", new Subscriber() {
+
+					@Override
+					public void onPublish( Event event ) {
+						success = true;
+					}
+
+				} );
+
+				subscribe( "FAIL", new Subscriber() {
+
+					@Override
+					public void onPublish( Event event ) {
+						Assert.fail();
+					}
+
+				} );
+
+			}
+
+		};
+		Assert.assertNotNull( root );
+		Assert.assertTrue( success );
+	}
+
+	@Test
+	public void testSecondChoiceWhenNestingIsTraversible() {
+		success = false;
+		Publisher root = new Evy( "@ a\n @ b1\n  @ c1\n   d1\n @ b2\n  @ c2\n   d2\n  @ c3\n   d3\na\nb2\nc3" ) {
+
+			@Override
+			protected void registerDefaultSubscriptions() {
+				super.registerDefaultSubscriptions();
+				subscribe( "d3", new Subscriber() {
+
+					@Override
+					public void onPublish( Event event ) {
+						success = true;
+					}
+
+				} );
+			}
+
+		};
+		Assert.assertNotNull( root );
+		Assert.assertTrue( success );
+	}
+
+	@Test
+	public void testSubscribersShouldNotInterruptTheirSiblings() throws IOException {
+
+		success = false;
+
+		Evy evy = Evy.fromFile( new File( "src/test/resources/test_sibling_interruption.ev" ) );
+
+		evy.subscribe( "PASS", new Subscriber() {
+
+			@Override
+			public void onPublish( Event event ) {
+				success = true;
+			}
+
+		} );
+		evy.publish( "START" );
+		Assert.assertTrue( "Subscriber prevented its next sibling from being consulted.", success );
 	}
 
 	@Test

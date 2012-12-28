@@ -1,0 +1,8 @@
+@ START
+ @ test this=123
+  @ test
+   ...
+  @ test that=456
+   PASS
+ test this=123
+ test that=456

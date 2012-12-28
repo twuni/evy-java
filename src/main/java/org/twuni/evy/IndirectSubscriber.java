@@ -19,11 +19,11 @@ public class IndirectSubscriber implements Subscriber {
 				String [] parameter = parent.getParameters().get( i );
 				if( parameter[0] == null ) {
 					if( triggeringEvent.get( parameter[1] ) == null ) {
-						throw new RuntimeException( "No match!" );
+						throw new MatchNotFoundException();
 					}
 				} else {
 					if( !parameter[1].equals( triggeringEvent.get( parameter[0] ) ) ) {
-						throw new RuntimeException( "No match!" );
+						throw new MatchNotFoundException();
 					}
 				}
 			}

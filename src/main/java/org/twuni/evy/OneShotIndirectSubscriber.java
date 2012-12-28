@@ -14,8 +14,9 @@ public class OneShotIndirectSubscriber extends IndirectSubscriber {
 		try {
 			super.onPublish( triggeringEvent );
 			publisher.unsubscribe( subscribedEventName, this );
-		} catch( RuntimeException exception ) {
-			// This wasn't a match.
+		} catch( MatchNotFoundException exception ) {
+			// Let's just pretend this never happened and keep our subscription active until we do
+			// find a match.
 		}
 	}
 

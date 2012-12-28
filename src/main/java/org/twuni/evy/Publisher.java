@@ -28,6 +28,31 @@ public class Publisher {
 	}
 
 	/**
+	 * Gets a snapshot of all subscribers for the given event.
+	 * 
+	 * @param eventName
+	 *            the name of the subscribed event.
+	 * @return all subscribers for that event.
+	 */
+	protected Subscriber [] getSubscribers( String eventName ) {
+
+		List<Subscriber> subscribers = events.get( eventName );
+
+		if( subscribers == null ) {
+			return new Subscriber [0];
+		}
+
+		Subscriber [] copy = new Subscriber [subscribers.size()];
+
+		for( int i = 0; i < copy.length; i++ ) {
+			copy[i] = subscribers.get( i );
+		}
+
+		return copy;
+
+	}
+
+	/**
 	 * Publishes the root event.
 	 */
 	public void publish() {
@@ -58,11 +83,16 @@ public class Publisher {
 	/**
 	 * Publishes an event with no parameters.
 	 * 
-	 * @param eventName
-	 *            The name of the event to publish.
+	 * @param eventSource
+	 *            The source of the event to publish. May be an event name, an event with
+	 *            parameters, or an Evy-formatted event tree.
 	 */
-	public void publish( String eventName ) {
-		publish( eventName, null );
+	public void publish( String eventSource ) {
+		if( eventSource != null && eventSource.indexOf( ' ' ) > -1 ) {
+			publish( eventSource.indexOf( '\n' ) > -1 ? new EventTree( eventSource ) : new Event( eventSource ) );
+			return;
+		}
+		publish( eventSource, null );
 	}
 
 	/**
@@ -89,32 +119,20 @@ public class Publisher {
 	 *            on to subscribers. If context is null, the root context will be used instead.
 	 */
 	public void publish( String eventName, List<String []> parameters, Event context ) {
-		if( events.isEmpty() ) {
-			registerDefaultSubscriptions();
-		}
-		List<Subscriber> subscribers = events.get( eventName );
-		if( subscribers == null ) {
-			return;
-		}
+
 		if( context == null ) {
 			context = root;
 		}
 
-		int length = subscribers.size();
+		if( events.isEmpty() ) {
+			registerDefaultSubscriptions();
+		}
 
-		for( int i = 0; i < length; i++ ) {
+		Subscriber [] triggered = getSubscribers( eventName );
 
-			Subscriber subscriber = subscribers.get( i );
-
+		for( Subscriber subscriber : triggered ) {
 			context.setSymbols( parameters );
 			subscriber.onPublish( context );
-
-			int d = subscribers.size() - length;
-			length += d;
-			if( d < 0 ) {
-				i += d;
-			}
-
 		}
 
 	}

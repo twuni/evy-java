@@ -14,7 +14,7 @@ public class Subscription implements Subscriber {
 	 * @param eventName
 	 *            The event to which this executor will subscribe.
 	 */
-	protected Subscriber createExecutor( Event context, String eventName, Event parent ) {
+	protected Subscriber createSubscriber( Event context, String eventName, Event parent ) {
 		return new IndirectSubscriber( root, context, parent );
 	}
 
@@ -23,7 +23,7 @@ public class Subscription implements Subscriber {
 		String eventName = event.get( 0 );
 		for( int i = 0; i < event.getChildren().size(); i++ ) {
 			Event child = event.getChildren().get( i );
-			root.subscribe( eventName, createExecutor( child, eventName, event ) );
+			root.subscribe( eventName, createSubscriber( child, eventName, event ) );
 		}
 	}
 
